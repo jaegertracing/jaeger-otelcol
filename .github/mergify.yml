@@ -8,6 +8,9 @@ pull_request_rules:
   - name: Automatic merge when all checks pass and the PR is approved
     conditions:
       - "#approved-reviews-by>=1"
+      - "status-success=build"
+      - "status-success=DCO"
+      - "status-success=WIP"
       - "-draft"
     actions:
       merge:
