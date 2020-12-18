@@ -21,3 +21,6 @@ processors:
 exporters:
   - import: go.opentelemetry.io/collector/exporter/jaegerexporter
     core: true
+  - import: go.opentelemetry.io/collector/exporter/loggingexporter
+    core: true
+

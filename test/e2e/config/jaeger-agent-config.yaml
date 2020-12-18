@@ -1,0 +1,24 @@
+extensions:
+  health_check:
+    port: 13133
+
+receivers:
+  jaeger:
+    protocols:
+      thrift_compact:
+
+exporters:
+  logging:
+    logLevel: debug
+  jaeger:
+    endpoint: "localhost:14250"
+    insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [jaeger]
+      processors: []
+      exporters: [jaeger, logging]
+
+  extensions: [health_check]
