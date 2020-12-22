@@ -3,15 +3,14 @@
 package e2e
 
 import (
-	"bytes"
 	"fmt"
-	"index/suffixarray"
-	"regexp"
+	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
+	"io/ioutil"
+	"os"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -48,8 +47,9 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	agentConfigFileName := "./config/jaeger-agent-config.yaml"
 	metricsPort := "8888"
 
-	var agentLoggerOutput bytes.Buffer
-	agent := StartCollector(t, agentExecutable, agentConfigFileName, &agentLoggerOutput, metricsPort)
+	loggerOutputFile := createTempFile()
+	defer os.Remove(loggerOutputFile.Name())
+	agent := StartCollector(t, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
 	defer agent.Process.Kill()
 
 	// Create some traces. Each trace created by tracegen will have 2 spans
@@ -60,16 +60,10 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 
 	// This could be changed to logrus.Debugf if we can stop logrus from eating newlines
 	if logrus.GetLevel() == logrus.DebugLevel {
-		fmt.Printf("%s", agentLoggerOutput.String())
+		log, err := ioutil.ReadFile(loggerOutputFile.Name())
+		require.NoError(t, err)
+		fmt.Printf("%s", log)
 	}
-
-	// Check the agent output for service name and Span entries
-	require.Contains(t, agentLoggerOutput.String(), "service.name: STRING("+serviceName+")")
-
-	spanExpression := regexp.MustCompile("Span #")
-	index := suffixarray.New(agentLoggerOutput.Bytes())
-	results := index.FindAllIndex(spanExpression, -1)
-	require.Equal(t, expectedSpanCount, len(results))
 
 	// Check the metrics to verify that the agent received and then sent the number of spans expected
 	metricsEndpoint := "http://localhost:" + metricsPort + "/metrics"
@@ -78,3 +72,4 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	require.Equal(t, strconv.Itoa(expectedSpanCount), receivedSpansMetric.Value)
 	require.Equal(t, strconv.Itoa(expectedSpanCount), sentSpansMetric.Value)
 }
+

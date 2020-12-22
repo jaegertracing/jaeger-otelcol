@@ -96,3 +96,9 @@ func setLogrusLevel(t *testing.T) {
 	logrus.SetLevel(ll)
 	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
 }
+
+func createTempFile() *os.File {
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	require.NoError(t, err)
+	return tmpFile
+}
