@@ -1,15 +1,16 @@
 package e2e
 
 import (
+	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
-	"time"
 
+	pcm "github.com/prometheus/client_model/go"
+	"github.com/prometheus/prom2json"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
@@ -18,12 +19,6 @@ var (
 	t           *testing.T
 	logrusLevel = getStringEnv("LOGRUS_LEVEL", "info")
 )
-
-type Metric struct {
-	Key      string
-	JSONPart string
-	Value    string
-}
 
 func getStringEnv(key, defaultValue string) string {
 	if value, ok := os.LookupEnv(key); ok {
@@ -45,49 +40,36 @@ func StartCollector(t *testing.T, executable, configFileName string, loggerOutpu
 	return cmd
 }
 
-func getMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
-	for _, m := range getMetrics(t, metricsEndpoint) {
-		if m.Key == strings.TrimSpace(metricKey) {
-			return m
-		}
-	}
-
-	logrus.Warnf("Could not find metric %s at endpoint %s", metricKey, metricsEndpoint)
-	emptyMetric := Metric{}
-	return emptyMetric
+func getPrometheusCounter(t *testing.T, metricsEndpoint, metricName string) float64 {
+	counter := getPrometheusMetric(t, metricsEndpoint, metricName)
+	return *counter.Metric[0].Counter.Value
 }
 
-func getMetrics(t *testing.T, metricsEndpoint string) []Metric {
-	httpClient := http.Client{Timeout: 5 * time.Second}
+func getPrometheusMetric(t *testing.T, metricsEndpoint, metricName string) pcm.MetricFamily {
+	allMetrics := getPrometheusMetrics(t, metricsEndpoint)
+	return allMetrics[metricName]
+}
 
-	request, err := http.NewRequest(http.MethodGet, metricsEndpoint, nil)
-	require.NoError(t, err)
-	response, err := httpClient.Do(request)
-	require.NoError(t, err)
-
-	body, err := ioutil.ReadAll(response.Body)
-	require.NoError(t, err)
-
-	lines := strings.Split(string(body), "\n")
-	metrics := []Metric{}
-	for _, line := range lines {
-		if !strings.HasPrefix(line, "#") && strings.TrimSpace(line) != "" {
-			openBracket := strings.Index(line, "{")
-			closeBracket := strings.Index(line, "}") + 1
-			key := line[:openBracket]
-			jsonPart := line[openBracket:closeBracket]
-			value := line[closeBracket:]
-
-			metric := Metric{
-				Key:      key,
-				JSONPart: jsonPart,
-				Value:    strings.TrimSpace(value),
-			}
-			metrics = append(metrics, metric)
-		}
+// This code is mostly copied from https://github.com/prometheus/prom2json except it
+// returns MetricFamily objects as that is more useful than JSON for tests.
+func getPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.MetricFamily {
+	mfChan := make(chan *pcm.MetricFamily, 1024)
+	tlsConfig := &tls.Config{InsecureSkipVerify: true}
+	transport := &http.Transport{
+		TLSClientConfig: tlsConfig,
 	}
 
-	return metrics
+	// I don't think it's necesary to run this as a goroutine but that's what prom2json does
+	go func() {
+		err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, transport)
+		require.NoError(t, err)
+	}()
+	result := map[string]pcm.MetricFamily{}
+	for mf := range mfChan {
+		result[*mf.Name] = *mf
+	}
+
+	return result
 }
 
 func setLogrusLevel(t *testing.T) {
