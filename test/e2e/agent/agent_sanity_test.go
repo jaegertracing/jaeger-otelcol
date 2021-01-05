@@ -4,6 +4,7 @@ package e2e
 
 import (
 	"fmt"
+	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
 	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 	"io/ioutil"
 	"os"
@@ -20,8 +21,10 @@ type AgentSanityTestSuite struct {
 	suite.Suite
 }
 
+var t *testing.T
+
 func (suite *AgentSanityTestSuite) SetupSuite() {
-	setLogrusLevel(suite.T())
+	e2e.SetLogrusLevel(suite.T())
 }
 
 func (suite *AgentSanityTestSuite) TearDownSuite() {
@@ -43,13 +46,13 @@ func (suite *AgentSanityTestSuite) AfterTest(suiteName, testName string) {
 
 func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	// Start the agent
-	agentExecutable := "../../builds/agent/jaeger-otel-agent"
+	agentExecutable := "../../../builds/agent/jaeger-otel-agent"
 	agentConfigFileName := "./config/jaeger-agent-config.yaml"
 	metricsPort := "8888"
 
-	loggerOutputFile := createTempFile()
+	loggerOutputFile := e2e.CreateTempFile(t)
 	defer os.Remove(loggerOutputFile.Name())
-	agent := StartCollector(t, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
+	agent := e2e.StartCollector(t, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
 	defer agent.Process.Kill()
 
 	// Create some traces. Each trace created by tracegen will have 2 spans
@@ -67,8 +70,8 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 
 	// Check the metrics to verify that the agent received and then sent the number of spans expected
 	metricsEndpoint := "http://localhost:" + metricsPort + "/metrics"
-	receivedSpansMetric := getMetric(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
-	sentSpansMetric := getMetric(t, metricsEndpoint, "otelcol_exporter_sent_spans")
+	receivedSpansMetric := e2e.GetMetric(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
+	sentSpansMetric := e2e.GetMetric(t, metricsEndpoint, "otelcol_exporter_sent_spans")
 	require.Equal(t, strconv.Itoa(expectedSpanCount), receivedSpansMetric.Value)
 	require.Equal(t, strconv.Itoa(expectedSpanCount), sentSpansMetric.Value)
 }

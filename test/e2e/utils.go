@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	t           *testing.T
 	logrusLevel = getStringEnv("LOGRUS_LEVEL", "info")
 )
 
@@ -45,8 +44,8 @@ func StartCollector(t *testing.T, executable, configFileName string, loggerOutpu
 	return cmd
 }
 
-func getMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
-	for _, m := range getMetrics(t, metricsEndpoint) {
+func GetMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
+	for _, m := range GetMetrics(t, metricsEndpoint) {
 		if m.Key == strings.TrimSpace(metricKey) {
 			return m
 		}
@@ -57,7 +56,7 @@ func getMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
 	return emptyMetric
 }
 
-func getMetrics(t *testing.T, metricsEndpoint string) []Metric {
+func GetMetrics(t *testing.T, metricsEndpoint string) []Metric {
 	httpClient := http.Client{Timeout: 5 * time.Second}
 
 	request, err := http.NewRequest(http.MethodGet, metricsEndpoint, nil)
@@ -90,14 +89,14 @@ func getMetrics(t *testing.T, metricsEndpoint string) []Metric {
 	return metrics
 }
 
-func setLogrusLevel(t *testing.T) {
+func SetLogrusLevel(t *testing.T) {
 	ll, err := logrus.ParseLevel(logrusLevel)
 	require.NoError(t, err)
 	logrus.SetLevel(ll)
 	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
 }
 
-func createTempFile() *os.File {
+func CreateTempFile(t *testing.T) *os.File {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	require.NoError(t, err)
 	return tmpFile
