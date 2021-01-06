@@ -25,9 +25,15 @@ OTELCOL_BUILDER=$(shell which opentelemetry-collector-builder)
 endif
 
 .PHONY: e2e-tests
-e2e-tests: build e2e-tests-agent-smoke
+e2e-tests: build e2e-tests-agent-smoke e2e-tests-collector-smoke
 
 .PHONY: e2e-tests-agent-smoke
 e2e-tests-agent-smoke: build-agent
-	@echo Running Agent  end-to-end tests...
+	@echo Running Agent end-to-end smoke tests...
 	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=agent_smoke ./test/e2e/... $(TEST_OPTIONS)
+
+.PHONY: e2e-tests-collector-smoke
+e2e-tests-collector-smoke: build-collector
+	@echo Running Collector end-to-end smoke tests...
+	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=collector_smoke ./test/e2e/... $(TEST_OPTIONS)
+

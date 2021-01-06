@@ -4,9 +4,11 @@ import (
 	"crypto/tls"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	pcm "github.com/prometheus/client_model/go"
@@ -80,4 +82,17 @@ func CreateTempFile(t *testing.T) *os.File {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	require.NoError(t, err)
 	return tmpFile
+}
+
+func GetFreePort(t *testing.T) string {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	require.NoError(t, err)
+	listener, err := net.ListenTCP("tcp", addr)
+	require.NoError(t, err)
+	defer listener.Close()
+
+	address := listener.Addr().String()
+	colon := strings.Index(address, ":")
+	port := address[colon+1:]
+	return port
 }
