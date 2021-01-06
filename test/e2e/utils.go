@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	t           *testing.T
 	logrusLevel = getStringEnv("LOGRUS_LEVEL", "info")
 )
 
@@ -40,30 +39,28 @@ func StartCollector(t *testing.T, executable, configFileName string, loggerOutpu
 	return cmd
 }
 
-func getPrometheusCounter(t *testing.T, metricsEndpoint, metricName string) float64 {
-	counter := getPrometheusMetric(t, metricsEndpoint, metricName)
+func GetPrometheusCounter(t *testing.T, metricsEndpoint, metricName string) float64 {
+	counter := GetPrometheusMetric(t, metricsEndpoint, metricName)
 	return *counter.Metric[0].Counter.Value
 }
 
-func getPrometheusMetric(t *testing.T, metricsEndpoint, metricName string) pcm.MetricFamily {
-	allMetrics := getPrometheusMetrics(t, metricsEndpoint)
+func GetPrometheusMetric(t *testing.T, metricsEndpoint, metricName string) pcm.MetricFamily {
+	allMetrics := GetPrometheusMetrics(t, metricsEndpoint)
 	return allMetrics[metricName]
 }
 
+
 // This code is mostly copied from https://github.com/prometheus/prom2json except it
 // returns MetricFamily objects as that is more useful than JSON for tests.
-func getPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.MetricFamily {
+func GetPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.MetricFamily {
 	mfChan := make(chan *pcm.MetricFamily, 1024)
 	tlsConfig := &tls.Config{InsecureSkipVerify: true}
 	transport := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
-
-	// I don't think it's necesary to run this as a goroutine but that's what prom2json does
-	go func() {
-		err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, transport)
-		require.NoError(t, err)
-	}()
+	
+	err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, transport)
+	require.NoError(t, err)
 	result := map[string]pcm.MetricFamily{}
 	for mf := range mfChan {
 		result[*mf.Name] = *mf
@@ -72,14 +69,14 @@ func getPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.M
 	return result
 }
 
-func setLogrusLevel(t *testing.T) {
+func SetLogrusLevel(t *testing.T) {
 	ll, err := logrus.ParseLevel(logrusLevel)
 	require.NoError(t, err)
 	logrus.SetLevel(ll)
 	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
 }
 
-func createTempFile() *os.File {
+func CreateTempFile(t *testing.T) *os.File {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	require.NoError(t, err)
 	return tmpFile

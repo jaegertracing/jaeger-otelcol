@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
 	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
-
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -21,8 +21,10 @@ type AgentSanityTestSuite struct {
 	suite.Suite
 }
 
+var t *testing.T
+
 func (suite *AgentSanityTestSuite) SetupSuite() {
-	setLogrusLevel(suite.T())
+	e2e.SetLogrusLevel(suite.T())
 }
 
 func (suite *AgentSanityTestSuite) TearDownSuite() {
@@ -44,13 +46,13 @@ func (suite *AgentSanityTestSuite) AfterTest(suiteName, testName string) {
 
 func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	// Start the agent
-	agentExecutable := "../../builds/agent/jaeger-otel-agent"
+	agentExecutable := "../../../builds/agent/jaeger-otel-agent"
 	agentConfigFileName := "./config/jaeger-agent-config.yaml"
 	metricsPort := "8888"
 
-	loggerOutputFile := createTempFile()
+	loggerOutputFile := e2e.CreateTempFile(t)
 	defer os.Remove(loggerOutputFile.Name())
-	agent := StartCollector(t, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
+	agent := e2e.StartCollector(t, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
 	defer agent.Process.Kill()
 
 	// Create some traces. Each trace created by tracegen will have 2 spans
@@ -68,8 +70,9 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 
 	// Check the metrics to verify that the agent received and then sent the number of spans expected
 	metricsEndpoint := "http://localhost:" + metricsPort + "/metrics"
-	receivedSpansCounter := getPrometheusCounter(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
-	sentSpansCounter := getPrometheusCounter(t, metricsEndpoint, "otelcol_exporter_sent_spans")
+	receivedSpansCounter := e2e.GetPrometheusCounter(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
+	sentSpansCounter := e2e.GetPrometheusCounter(t, metricsEndpoint, "otelcol_exporter_sent_spans")
 	require.Equal(t, expectedSpanCount, int(receivedSpansCounter))
 	require.Equal(t, expectedSpanCount, int(sentSpansCounter))
+
 }
