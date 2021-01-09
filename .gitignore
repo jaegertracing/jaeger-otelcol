@@ -17,4 +17,8 @@
 .idea/
 _build
 
+# Output of the opentelemetry-collector-builder
 builds/
+
+# Linter logs
+.lint.log
