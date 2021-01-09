@@ -40,10 +40,14 @@ lint: fmt go-lint
 go-lint:
 	@cat /dev/null > $(LINT_LOG)
 	@echo Running go lint...
-	$(GOLINT) $(ALL_PKGS) | grep -v _nolint.go >> $(LINT_LOG) || true;
+	@$(GOLINT) $(ALL_PKGS) | grep -v _nolint.go >> $(LINT_LOG) || true;
 	@[ ! -s "$(LINT_LOG)" ] || (echo "Lint Failures" | cat - $(LINT_LOG) && false)
 
 .PHONY: fmt
 fmt:
 	@echo Running go fmt on ALL_SRC ...
 	@$(GOFMT) -e -s -l -w $(ALL_SRC)
+
+.PHONY: install-tools
+install-tools:
+	go install golang.org/x/lint/golint
