@@ -16,9 +16,9 @@ package tracegen
 
 import (
 	"fmt"
-	"testing"
 	"sync"
 	"sync/atomic"
+	"testing"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
