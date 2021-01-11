@@ -21,6 +21,12 @@ jobs:
         go-version: 1.14
       id: go
 
+    - name: Install tools
+      run: make install-tools
+
+    - name: Lint
+      run: make lint
+
     - name: Build the distribution
       run: make build
 
