@@ -16,9 +16,9 @@ package tracegen
 
 import (
 	"fmt"
-	"testing"
 	"sync"
 	"sync/atomic"
+	"testing"
 	"time"
 
 	"github.com/opentracing/opentracing-go"
@@ -43,6 +43,7 @@ type Config struct {
 	Service  string
 }
 
+// CreateJaegerTraces creates jaeger traces.
 func CreateJaegerTraces(t *testing.T, workers, traces int, duration time.Duration, serviceName string) {
 	config := &Config{
 		Workers:  workers,
