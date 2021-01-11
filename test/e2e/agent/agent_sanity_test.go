@@ -75,4 +75,3 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	require.Equal(t, strconv.Itoa(expectedSpanCount), receivedSpansMetric.Value)
 	require.Equal(t, strconv.Itoa(expectedSpanCount), sentSpansMetric.Value)
 }
-

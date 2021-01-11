@@ -18,6 +18,7 @@ var (
 	logrusLevel = getStringEnv("LOGRUS_LEVEL", "info")
 )
 
+// Metric can contain the value of a prometheus metric
 type Metric struct {
 	Key      string
 	JSONPart string
@@ -31,6 +32,7 @@ func getStringEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+// StartCollector starts the executable in background
 func StartCollector(t *testing.T, executable, configFileName string, loggerOutput io.Writer, metricsPort string) *exec.Cmd {
 	// metrics-addr is needed to avoid collisions when we start multiple processes
 	arguments := []string{executable, "--config", configFileName, "--metrics-addr", "localhost:" + metricsPort}
@@ -44,6 +46,7 @@ func StartCollector(t *testing.T, executable, configFileName string, loggerOutpu
 	return cmd
 }
 
+// GetMetric returns the value of the named metric
 func GetMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
 	for _, m := range GetMetrics(t, metricsEndpoint) {
 		if m.Key == strings.TrimSpace(metricKey) {
@@ -56,6 +59,7 @@ func GetMetric(t *testing.T, metricsEndpoint string, metricKey string) Metric {
 	return emptyMetric
 }
 
+// GetMetrics returns all metrics from the endpoint
 func GetMetrics(t *testing.T, metricsEndpoint string) []Metric {
 	httpClient := http.Client{Timeout: 5 * time.Second}
 
@@ -89,6 +93,7 @@ func GetMetrics(t *testing.T, metricsEndpoint string) []Metric {
 	return metrics
 }
 
+// SetLogrusLevel can be used to set the logging level
 func SetLogrusLevel(t *testing.T) {
 	ll, err := logrus.ParseLevel(logrusLevel)
 	require.NoError(t, err)
@@ -96,6 +101,7 @@ func SetLogrusLevel(t *testing.T) {
 	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
 }
 
+// CreateTempFile creates a temp file
 func CreateTempFile(t *testing.T) *os.File {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	require.NoError(t, err)
