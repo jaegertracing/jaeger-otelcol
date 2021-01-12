@@ -4,13 +4,15 @@ package e2e
 
 import (
 	"fmt"
-	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
-	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
+
 	"io/ioutil"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
+	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -28,7 +30,7 @@ func (suite *AgentSanityTestSuite) SetupSuite() {
 }
 
 func (suite *AgentSanityTestSuite) TearDownSuite() {
-	logrus.Infof("In teardown wuite")
+	logrus.Infof("In teardown suite")
 }
 
 func TestAgentSanityTestSuite(t *testing.T) {
@@ -70,8 +72,8 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 
 	// Check the metrics to verify that the agent received and then sent the number of spans expected
 	metricsEndpoint := "http://localhost:" + metricsPort + "/metrics"
-	receivedSpansMetric := e2e.GetMetric(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
-	sentSpansMetric := e2e.GetMetric(t, metricsEndpoint, "otelcol_exporter_sent_spans")
-	require.Equal(t, strconv.Itoa(expectedSpanCount), receivedSpansMetric.Value)
-	require.Equal(t, strconv.Itoa(expectedSpanCount), sentSpansMetric.Value)
+	receivedSpansCounter := e2e.GetPrometheusCounter(t, metricsEndpoint, "otelcol_receiver_accepted_spans")
+	sentSpansCounter := e2e.GetPrometheusCounter(t, metricsEndpoint, "otelcol_exporter_sent_spans")
+	require.Equal(t, expectedSpanCount, int(receivedSpansCounter))
+	require.Equal(t, expectedSpanCount, int(sentSpansCounter))
 }
