@@ -31,16 +31,14 @@ otelcol-builder:
 ifeq (, $(shell which opentelemetry-collector-builder))
 	go get github.com/observatorium/opentelemetry-collector-builder@v$(OTELCOL_BUILDER_VERSION)
 endif
-<<<<<<< HEAD
 
 .PHONY: e2e-tests
 e2e-tests: build e2e-tests-agent-smoke
 
 .PHONY: e2e-tests-agent-smoke
 e2e-tests-agent-smoke: build-agent
-	@echo Running Agent  end-to-end tests...
+	@echo Running Agent end-to-end tests...
 	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=agent_smoke ./test/e2e/... $(TEST_OPTIONS)
-=======
 OTELCOL_BUILDER=$(shell which opentelemetry-collector-builder)
 
 .PHONY: lint
@@ -61,4 +59,4 @@ fmt:
 .PHONY: install-tools
 install-tools:
 	go install golang.org/x/lint/golint
->>>>>>> e3beb54... Use installation method advised in otelcol builder README (#18)
+

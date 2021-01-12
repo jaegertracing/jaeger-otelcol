@@ -4,14 +4,15 @@ package e2e
 
 import (
 	"fmt"
+
+	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
+	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
-	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -74,5 +75,4 @@ func (suite *AgentSanityTestSuite) TestAgentSanity() {
 	sentSpansCounter := e2e.GetPrometheusCounter(t, metricsEndpoint, "otelcol_exporter_sent_spans")
 	require.Equal(t, expectedSpanCount, int(receivedSpansCounter))
 	require.Equal(t, expectedSpanCount, int(sentSpansCounter))
-
 }

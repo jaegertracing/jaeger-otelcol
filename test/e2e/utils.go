@@ -26,6 +26,7 @@ func getStringEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
+// StartCollector starts the executable in background
 func StartCollector(t *testing.T, executable, configFileName string, loggerOutput io.Writer, metricsPort string) *exec.Cmd {
 	// metrics-addr is needed to avoid collisions when we start multiple processes
 	arguments := []string{executable, "--config", configFileName, "--metrics-addr", "localhost:" + metricsPort}
@@ -49,7 +50,6 @@ func GetPrometheusMetric(t *testing.T, metricsEndpoint, metricName string) pcm.M
 	return allMetrics[metricName]
 }
 
-
 // This code is mostly copied from https://github.com/prometheus/prom2json except it
 // returns MetricFamily objects as that is more useful than JSON for tests.
 func GetPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.MetricFamily {
@@ -58,7 +58,7 @@ func GetPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.M
 	transport := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
-	
+
 	err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, transport)
 	require.NoError(t, err)
 	result := map[string]pcm.MetricFamily{}
@@ -76,6 +76,7 @@ func SetLogrusLevel(t *testing.T) {
 	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
 }
 
+// CreateTempFile creates a temp file
 func CreateTempFile(t *testing.T) *os.File {
 	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	require.NoError(t, err)
