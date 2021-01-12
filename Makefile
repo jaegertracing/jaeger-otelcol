@@ -37,7 +37,7 @@ e2e-tests: build e2e-tests-agent-smoke
 
 .PHONY: e2e-tests-agent-smoke
 e2e-tests-agent-smoke: build-agent
-	@echo Running Agent  end-to-end tests...
+	@echo Running Agent end-to-end tests...
 	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=agent_smoke ./test/e2e/... $(TEST_OPTIONS)
 OTELCOL_BUILDER=$(shell which opentelemetry-collector-builder)
 
