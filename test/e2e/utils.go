@@ -1,7 +1,6 @@
 package e2e
 
 import (
-	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -57,12 +56,7 @@ func GetPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.M
 	// This code is mostly copied from https://github.com/prometheus/prom2json except it
 	// returns MetricFamily objects as that is more useful than JSON for tests.
 	mfChan := make(chan *pcm.MetricFamily, 1024)
-	tlsConfig := &tls.Config{InsecureSkipVerify: true}
-	transport := &http.Transport{
-		TLSClientConfig: tlsConfig,
-	}
-
-	err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, transport)
+	err := prom2json.FetchMetricFamilies(metricsEndpoint, mfChan, &http.Transport{})
 	require.NoError(t, err)
 	result := map[string]pcm.MetricFamily{}
 	for mf := range mfChan {
