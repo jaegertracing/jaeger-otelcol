@@ -34,4 +34,4 @@ jobs:
       env:
         LOGRUS_LEVEL: "debug"
         TEST_OPTIONS: "-v"
-      run: ./.ci/run-e2e-tests.sh
+      run: make e2e-tests

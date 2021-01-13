@@ -33,13 +33,18 @@ ifeq (, $(shell which opentelemetry-collector-builder))
 endif
 
 .PHONY: e2e-tests
-e2e-tests: build e2e-tests-agent-smoke
+e2e-tests: build e2e-tests-agent-smoke e2e-tests-collector-smoke
 
 .PHONY: e2e-tests-agent-smoke
 e2e-tests-agent-smoke: build-agent
 	@echo Running Agent end-to-end tests...
-	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=agent_smoke ./test/e2e/... $(TEST_OPTIONS)
+	@go test -tags=agent_smoke ./test/e2e/agent/... $(TEST_OPTIONS)
 OTELCOL_BUILDER=$(shell which opentelemetry-collector-builder)
+
+.PHONY: e2e-tests-collector-smoke
+e2e-tests-collector-smoke: build-collector
+	@echo Running Collector end-to-end tests...
+	@go test -tags=collector_smoke ./test/e2e/collector/... $(TEST_OPTIONS)
 
 .PHONY: lint
 lint: fmt go-lint

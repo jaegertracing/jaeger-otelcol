@@ -1,0 +1,25 @@
+extensions:
+  health_check:
+    port: 13134
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+receivers:
+  jaeger:
+    protocols:
+      thrift_compact:
+
+exporters:
+  logging:
+    logLevel: debug
+
+service:
+  pipelines:
+    traces:
+      receivers: [jaeger]
+      processors: []
+      exporters: [logging]
+
+  extensions: [health_check, pprof, zpages]
