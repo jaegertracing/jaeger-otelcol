@@ -1,7 +1,12 @@
 OTELCOL_BUILDER_VERSION ?= 0.2.0
-GOFMT=gofmt
-GOLINT=golint
-LINT_LOG=.lint.log
+GOFMT = gofmt
+GOLINT = golint
+LINT_LOG = .lint.log
+OTELCOL_BUILDER_DIR ?= ~/bin
+OTELCOL_BUILDER ?= $(OTELCOL_BUILDER_DIR)/opentelemetry-collector-builder
+
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
 
 # all .go files that are not auto-generated and should be auto-formatted and linted.
 ALL_SRC := $(shell find . -type d \( -name builds \) -prune -false -o \
@@ -29,7 +34,12 @@ build-collector: otelcol-builder
 .PHONY: otelcol-builder
 otelcol-builder:
 ifeq (, $(shell which opentelemetry-collector-builder))
-	go get github.com/observatorium/opentelemetry-collector-builder@v$(OTELCOL_BUILDER_VERSION)
+	@{ \
+	set -ex ;\
+	mkdir -p $(OTELCOL_BUILDER_DIR) ;\
+	curl -sLo $(OTELCOL_BUILDER) https://github.com/observatorium/opentelemetry-collector-builder/releases/download/v$(OTELCOL_BUILDER_VERSION)/opentelemetry-collector-builder_$(OTELCOL_BUILDER_VERSION)_$(GOOS)_$(GOARCH) ;\
+	chmod +x $(OTELCOL_BUILDER) ;\
+	}
 endif
 
 .PHONY: e2e-tests
@@ -39,7 +49,6 @@ e2e-tests: build e2e-tests-agent-smoke
 e2e-tests-agent-smoke: build-agent
 	@echo Running Agent end-to-end tests...
 	@BUILD_IMAGE=$(BUILD_IMAGE) go test -tags=agent_smoke ./test/e2e/... $(TEST_OPTIONS)
-OTELCOL_BUILDER=$(shell which opentelemetry-collector-builder)
 
 .PHONY: lint
 lint: fmt go-lint
