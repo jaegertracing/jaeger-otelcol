@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
-
-	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+
+	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
+	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 )
 
 type AgentSanityTestSuite struct {

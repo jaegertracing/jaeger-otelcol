@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
+	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 
 	"github.com/jaegertracing/jaeger-otelcol/test/e2e"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
+	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 )
 
 type CollectorSanityTestSuite struct {
@@ -46,18 +46,18 @@ func (suite *CollectorSanityTestSuite) AfterTest(suiteName, testName string) {
 
 func (suite *CollectorSanityTestSuite) TestCollectorSanity() {
 	// Start the collector
-	colletorExecutable := "../../../builds/collector/jaeger-otel-collector"
-	collectorConfigFileName := "./config/jaeger-collector-config.yaml"
+	const collector = "../../../builds/collector/jaeger-otel-collector"
+	const collectorConfigFileName = "./config/jaeger-collector-config.yaml"
 	metricsPort := e2e.GetFreePort(t)
 	logger.Infof("Using metrics port %s", metricsPort)
 
 	loggerOutputFile := e2e.CreateTempFile(t)
 	logger.Infof("Using log file %s", loggerOutputFile.Name())
-	agent := e2e.StartCollector(t, logger, colletorExecutable, collectorConfigFileName, loggerOutputFile, metricsPort)
+	agent := e2e.StartCollector(t, logger, collector, collectorConfigFileName, loggerOutputFile, metricsPort)
 	defer agent.Process.Kill()
 
 	// Create some traces. Each trace created by tracegen will have 2 spans
-	traceCount := 5
+	const traceCount = 5
 	expectedSpanCount := 2 * traceCount
 	serviceName := "collector-sanity-test" + strconv.Itoa(time.Now().Nanosecond())
 	tracegen.CreateJaegerTraces(t, 1, traceCount, 0, serviceName)
