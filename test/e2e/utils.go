@@ -3,19 +3,23 @@ package e2e
 import (
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
+
+	"go.uber.org/zap"
 
 	pcm "github.com/prometheus/client_model/go"
 	"github.com/prometheus/prom2json"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	logrusLevel = getStringEnv("LOGRUS_LEVEL", "info")
+	// LogLevel is used to set the level for the zap logger
+	LogLevel = getStringEnv("LOG_LEVEL", "info")
 )
 
 func getStringEnv(key, defaultValue string) string {
@@ -26,7 +30,7 @@ func getStringEnv(key, defaultValue string) string {
 }
 
 // StartCollector starts the executable in background
-func StartCollector(t *testing.T, executable, configFileName string, loggerOutput io.Writer, metricsPort string) *exec.Cmd {
+func StartCollector(t *testing.T, logger zap.SugaredLogger, executable, configFileName string, loggerOutput io.Writer, metricsPort string) *exec.Cmd {
 	// metrics-addr is needed to avoid collisions when we start multiple processes
 	arguments := []string{executable, "--config", configFileName, "--metrics-addr", "localhost:" + metricsPort}
 
@@ -35,7 +39,7 @@ func StartCollector(t *testing.T, executable, configFileName string, loggerOutpu
 	err := cmd.Start()
 	require.NoError(t, err)
 
-	logrus.Infof("Started process %d with %s", cmd.Process.Pid, executable)
+	logger.Infof("Started process %d with %s", cmd.Process.Pid, executable)
 	return cmd
 }
 
@@ -66,17 +70,36 @@ func GetPrometheusMetrics(t *testing.T, metricsEndpoint string) map[string]pcm.M
 	return result
 }
 
-// SetLogrusLevel sets the logging level
-func SetLogrusLevel(t *testing.T) {
-	ll, err := logrus.ParseLevel(logrusLevel)
-	require.NoError(t, err)
-	logrus.SetLevel(ll)
-	logrus.Infof("logrus level has been set to %s", logrus.GetLevel().String())
-}
-
 // CreateTempFile creates a temp file
 func CreateTempFile(t *testing.T) *os.File {
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
+	tmpFile, err := ioutil.TempFile(os.TempDir(), "jaeger-otel-test-")
 	require.NoError(t, err)
 	return tmpFile
+}
+
+// GetFreePort will return a free tcp port
+func GetFreePort(t *testing.T) string {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	require.NoError(t, err)
+	listener, err := net.ListenTCP("tcp", addr)
+	require.NoError(t, err)
+	defer listener.Close()
+
+	address := listener.Addr().String()
+	colon := strings.Index(address, ":")
+	port := address[colon+1:]
+	return port
+}
+
+// GetLogger returns a Zap Sugared logger
+func GetLogger(t *testing.T) zap.SugaredLogger {
+	var zapLogger *zap.Logger
+	var err error
+	if LogLevel == "info" {
+		zapLogger, err = zap.NewProduction()
+	} else {
+		zapLogger, err = zap.NewDevelopment()
+	}
+	require.NoError(t, err)
+	return *zapLogger.Sugar()
 }

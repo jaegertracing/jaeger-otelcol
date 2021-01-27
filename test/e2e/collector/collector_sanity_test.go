@@ -1,4 +1,4 @@
-// +build agent_smoke
+// +build collector_smoke
 
 package e2e
 
@@ -16,50 +16,50 @@ import (
 	"github.com/jaegertracing/jaeger-otelcol/test/tools/tracegen"
 )
 
-type AgentSanityTestSuite struct {
+type CollectorSanityTestSuite struct {
 	suite.Suite
 }
 
 var t *testing.T
 var logger zap.SugaredLogger
 
-func (suite *AgentSanityTestSuite) SetupSuite() {
+func (suite *CollectorSanityTestSuite) SetupSuite() {
 	logger = e2e.GetLogger(suite.T())
 }
 
-func (suite *AgentSanityTestSuite) TearDownSuite() {
+func (suite *CollectorSanityTestSuite) TearDownSuite() {
 	logger.Infof("In teardown suite")
 }
 
-func TestAgentSanityTestSuite(t *testing.T) {
-	suite.Run(t, new(AgentSanityTestSuite))
+func TestCollectorSanityTestSuite(t *testing.T) {
+	suite.Run(t, new(CollectorSanityTestSuite))
 }
 
-func (suite *AgentSanityTestSuite) BeforeTest(suiteName, testName string) {
+func (suite *CollectorSanityTestSuite) BeforeTest(suiteName, testName string) {
 	t = suite.T()
 	logger.Debugf("In Before for %s", suite.T().Name())
 }
 
-func (suite *AgentSanityTestSuite) AfterTest(suiteName, testName string) {
-	logger.Debug("In AfterTest for %s", suite.T().Name())
+func (suite *CollectorSanityTestSuite) AfterTest(suiteName, testName string) {
+	logger.Debugf("In AfterTest for %s", suite.T().Name())
 }
 
-func (suite *AgentSanityTestSuite) TestAgentSanity() {
-	// Start the agent
-	agentExecutable := "../../../builds/agent/jaeger-otel-agent"
-	agentConfigFileName := "./config/jaeger-agent-config.yaml"
+func (suite *CollectorSanityTestSuite) TestCollectorSanity() {
+	// Start the collector
+	const collector = "../../../builds/collector/jaeger-otel-collector"
+	const collectorConfigFileName = "./config/jaeger-collector-config.yaml"
 	metricsPort := e2e.GetFreePort(t)
 	logger.Infof("Using metrics port %s", metricsPort)
 
 	loggerOutputFile := e2e.CreateTempFile(t)
 	logger.Infof("Using log file %s", loggerOutputFile.Name())
-	agent := e2e.StartCollector(t, logger, agentExecutable, agentConfigFileName, loggerOutputFile, metricsPort)
+	agent := e2e.StartCollector(t, logger, collector, collectorConfigFileName, loggerOutputFile, metricsPort)
 	defer agent.Process.Kill()
 
 	// Create some traces. Each trace created by tracegen will have 2 spans
-	traceCount := 5
+	const traceCount = 5
 	expectedSpanCount := 2 * traceCount
-	serviceName := "agent-sanity-test" + strconv.Itoa(time.Now().Nanosecond())
+	serviceName := "collector-sanity-test" + strconv.Itoa(time.Now().Nanosecond())
 	tracegen.CreateJaegerTraces(t, 1, traceCount, 0, serviceName)
 
 	// Check the metrics to verify that the agent received and then sent the number of spans expected
