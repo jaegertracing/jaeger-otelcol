@@ -1,4 +1,4 @@
-OTELCOL_BUILDER_VERSION ?= 0.2.0
+OTELCOL_BUILDER_VERSION ?= 0.4.1
 GOFMT = gofmt
 GOLINT = golint
 LINT_LOG = .lint.log
@@ -33,14 +33,7 @@ build-collector: otelcol-builder
 
 .PHONY: otelcol-builder
 otelcol-builder:
-ifeq (, $(shell which opentelemetry-collector-builder))
-	@{ \
-	set -ex ;\
-	mkdir -p $(OTELCOL_BUILDER_DIR) ;\
-	curl -sLo $(OTELCOL_BUILDER) https://github.com/observatorium/opentelemetry-collector-builder/releases/download/v$(OTELCOL_BUILDER_VERSION)/opentelemetry-collector-builder_$(OTELCOL_BUILDER_VERSION)_$(GOOS)_$(GOARCH) ;\
-	chmod +x $(OTELCOL_BUILDER) ;\
-	}
-endif
+	@scripts/install_otelcol_builder.sh -d $(OTELCOL_BUILDER_DIR) -v $(OTELCOL_BUILDER_VERSION)
 
 .PHONY: e2e-tests
 e2e-tests: build e2e-tests-agent-smoke e2e-tests-collector-smoke
