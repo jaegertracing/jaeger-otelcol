@@ -20,5 +20,5 @@ goarch=$(go env GOARCH)
 
 set -ex
 mkdir -p "$otelcol_builder_dir"
-curl -sLo "$otelcol_builder" "https://github.com/observatorium/opentelemetry-collector-builder/releases/download/v${otelcol_builder_version}/opentelemetry-collector-builder_${otelcol_builder_version}_${goos}_${goarch}"
+curl -sLo "$otelcol_builder" "https://github.com/open-telemetry/opentelemetry-collector-builder/releases/download/v${otelcol_builder_version}/opentelemetry-collector-builder_${otelcol_builder_version}_${goos}_${goarch}"
 chmod +x "${otelcol_builder}"
