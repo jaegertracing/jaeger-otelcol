@@ -61,5 +61,4 @@ fmt:
 
 .PHONY: install-tools
 install-tools:
-	go install golang.org/x/lint/golint
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
