@@ -17,3 +17,15 @@ pull_request_rules:
         method: squash
         commit_message: title+body
         bot_account: jaegerci-bot
+
+  - name: automatic merge for Dependabot pull requests
+    conditions:
+      - author~=^dependabot(|-preview)\[bot\]$
+      - "status-success=build"
+      - "status-success=DCO"
+      - "status-success=WIP"
+      - "-draft"
+    actions:
+      merge:
+        method: squash
+        commit_message: title+body
