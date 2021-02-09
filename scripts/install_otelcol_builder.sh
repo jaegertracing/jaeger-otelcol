@@ -9,8 +9,15 @@ do
 done
 
 if [ "$(which opentelemetry-collector-builder)" ]; then
-  echo "opentelemetry-collector-builder already installed"
-  exit 0
+  # Hacky, update once https://github.com/open-telemetry/opentelemetry-collector-builder/issues/5 is fixed
+  current_builder_version=$(opentelemetry-collector-builder --help | grep "builder (" | sed 's/^.*(//g' | sed 's/)//g')
+  if [ "${otelcol_builder_version}" == "${current_builder_version}" ]; then
+    echo "opentelemetry-collector-builder ${current_builder_version} already installed"
+    exit 0
+  else
+    echo "found old version of opentelemetry-collector-builder (${current_builder_version}), deleting"
+    rm -rf $(which opentelemetry-collector-builder)
+  fi
 fi
 
 echo "installing opentelemetry-collector-builder"
