@@ -36,9 +36,9 @@ import (
 	"go.opentelemetry.io/collector/obsreport"
 	"go.uber.org/zap"
 
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/esmodeltranslator"
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/internal/esclient"
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/internal/esutil"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/esmodeltranslator"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/internal/esclient"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/internal/esutil"
 )
 
 const (

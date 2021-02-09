@@ -20,6 +20,7 @@ import (
 	"io"
 	"testing"
 
+	"go.opencensus.io/tag"
 	"go.opentelemetry.io/collector/obsreport/obsreporttest"
 
 	"go.opentelemetry.io/collector/config/configtelemetry"
@@ -31,9 +32,9 @@ import (
 	"go.opentelemetry.io/collector/consumer/pdata"
 	"go.uber.org/zap"
 
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/esmodeltranslator"
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/internal/esclient"
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/internal/esutil"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/esmodeltranslator"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/internal/esclient"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/internal/esutil"
 	"github.com/jaegertracing/jaeger/pkg/cache"
 	"github.com/jaegertracing/jaeger/pkg/es/config"
 	"github.com/jaegertracing/jaeger/plugin/storage/es/spanstore/dbmodel"
@@ -203,6 +204,7 @@ func TestWriteSpans(t *testing.T) {
 		serviceIndexName: esutil.NewIndexNameProvider("service", "", "2006-01-02", esutil.AliasNone, false),
 		serviceCache:     cache.NewLRU(1),
 		obsReporter:      obsreport.NewExporterObsReport(configtelemetry.GetMetricsLevelFlagValue(), "name"),
+		exporterNameTag:  tag.Insert(tagExporter, "span-exporter"),
 	}
 
 	t.Run("zero_spans_failed", func(t *testing.T) {

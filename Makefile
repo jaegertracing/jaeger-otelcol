@@ -1,7 +1,6 @@
-OTELCOL_BUILDER_VERSION ?= 0.4.1
+OTELCOL_BUILDER_VERSION ?= 0.6.0
 GOFMT = gofmt
-GOLINT = golint
-LINT_LOG = .lint.log
+GOLINT = golangci-lint
 OTELCOL_BUILDER_DIR ?= ~/bin
 OTELCOL_BUILDER ?= $(OTELCOL_BUILDER_DIR)/opentelemetry-collector-builder
 
@@ -53,10 +52,7 @@ lint: fmt go-lint
 
 .PHONY: go-lint
 go-lint:
-	@cat /dev/null > $(LINT_LOG)
-	@echo Running go lint...
-	@$(GOLINT) $(ALL_PKGS) | grep -v _nolint.go >> $(LINT_LOG) || true;
-	@[ ! -s "$(LINT_LOG)" ] || (echo "Lint Failures" | cat - $(LINT_LOG) && false)
+	$(GOLINT) run --allow-parallel-runners
 
 .PHONY: fmt
 fmt:
@@ -65,4 +61,4 @@ fmt:
 
 .PHONY: install-tools
 install-tools:
-	go install golang.org/x/lint/golint
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint

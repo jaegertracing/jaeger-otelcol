@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/jaegertracing/jaeger-otelcol/exporters/elasticsearchexporter/esmodeltranslator"
+	"github.com/jaegertracing/jaeger-otelcol/exporter/elasticsearchexporter/esmodeltranslator"
 	"github.com/jaegertracing/jaeger/model"
 	"github.com/jaegertracing/jaeger/pkg/es/config"
 	"github.com/jaegertracing/jaeger/plugin/storage/es"
