@@ -19,6 +19,5 @@ linters:
     - maligned
     - misspell
     - gosec
-    - exhaustive
     - godot
     - unparam
