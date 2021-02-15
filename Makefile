@@ -25,9 +25,9 @@ build: build-agent build-collector
 .PHONY: build-agent
 build-agent: otelcol-builder
 	@mkdir -p builds/agent
-	@$(eval AGENT_TMP := $(shell mktemp -d))
-	@rm -rf ${AGENT_TMP}/agent.yaml
-	@sed "s/version:.*/version: ${VERSION}/g" manifests/agent.yaml > ${AGENT_TMP}/agent.yaml
+	$(eval AGENT_TMP := $(shell mktemp -d))
+	rm -rf ${AGENT_TMP}/agent.yaml
+	sed "s/version:.*/version: ${VERSION}/g" manifests/agent.yaml > ${AGENT_TMP}/agent.yaml
 	$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${AGENT_TMP}/agent.yaml
 
 .PHONY: build-collector
