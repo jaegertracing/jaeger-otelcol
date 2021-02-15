@@ -19,3 +19,7 @@ builds/
 
 # Output of the opentelemetry-collector-builder
 builds/
+
+# Output of goreleaser builds
+dist/
+

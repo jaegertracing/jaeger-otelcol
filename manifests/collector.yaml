@@ -3,7 +3,6 @@ dist:
   name: jaeger-otel-collector
   description: Jaeger OpenTelemetry Collector Distribution
   version: 0.1.0
-  otelcol_version: 0.13.0
   include_core: true
   output_path: ./builds/collector/
 

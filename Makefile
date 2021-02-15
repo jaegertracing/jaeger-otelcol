@@ -1,4 +1,6 @@
 OTELCOL_BUILDER_VERSION ?= 0.6.0
+OTELCOL_VERSION ?= 0.19.0
+VERSION ?= 0.0.1
 GOFMT = gofmt
 GOLINT = golangci-lint
 OTELCOL_BUILDER_DIR ?= ~/bin
@@ -23,12 +25,16 @@ build: build-agent build-collector
 .PHONY: build-agent
 build-agent: otelcol-builder
 	@mkdir -p builds/agent
-	@$(OTELCOL_BUILDER) --config manifests/agent.yaml
+	@rm -rf ${TMPDIR}/agent.yaml
+	@sed "s/version:.*/version: ${VERSION}/g" manifests/agent.yaml > ${TMPDIR}/agent.yaml
+	@$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${TMPDIR}/agent.yaml
 
 .PHONY: build-collector
 build-collector: otelcol-builder
 	@mkdir -p builds/collector
-	@$(OTELCOL_BUILDER) --config manifests/collector.yaml
+	@rm -rf ${TMPDIR}/collector.yaml
+	@sed "s/version:.*/version: ${VERSION}/g" manifests/collector.yaml > ${TMPDIR}/collector.yaml
+	@$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${TMPDIR}/collector.yaml
 
 .PHONY: otelcol-builder
 otelcol-builder:
