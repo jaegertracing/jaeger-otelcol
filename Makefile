@@ -25,16 +25,18 @@ build: build-agent build-collector
 .PHONY: build-agent
 build-agent: otelcol-builder
 	@mkdir -p builds/agent
-	@rm -rf ${TMPDIR}/agent.yaml
-	@sed "s/version:.*/version: ${VERSION}/g" manifests/agent.yaml > ${TMPDIR}/agent.yaml
-	@$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${TMPDIR}/agent.yaml
+	@$(eval AGENT_TMP := $(shell mktemp -d))
+	@rm -rf ${AGENT_TMP}/agent.yaml
+	@sed "s/version:.*/version: ${VERSION}/g" manifests/agent.yaml > ${AGENT_TMP}/agent.yaml
+	$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${AGENT_TMP}/agent.yaml
 
 .PHONY: build-collector
 build-collector: otelcol-builder
 	@mkdir -p builds/collector
-	@rm -rf ${TMPDIR}/collector.yaml
-	@sed "s/version:.*/version: ${VERSION}/g" manifests/collector.yaml > ${TMPDIR}/collector.yaml
-	@$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${TMPDIR}/collector.yaml
+	@$(eval COLLECTOR_TMP := $(shell mktemp -d))
+	@rm -rf ${COLLECTOR_TMP}/collector.yaml
+	@sed "s/version:.*/version: ${VERSION}/g" manifests/collector.yaml > ${COLLECTOR_TMP}/collector.yaml
+	@$(OTELCOL_BUILDER) --otelcol-version ${OTELCOL_VERSION} --config ${COLLECTOR_TMP}/collector.yaml
 
 .PHONY: otelcol-builder
 otelcol-builder:
