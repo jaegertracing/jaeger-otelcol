@@ -5,8 +5,7 @@ before:
     # First run the opentelemetry-collector-builder
     - make -e VERSION="{{.Version}}" build
 builds:
-  -
-    id: "jaeger-otel-agent"
+  - id: "jaeger-otel-agent"
     dir: ./builds/agent
     binary: "jaeger-otel-agent"
     flags:
