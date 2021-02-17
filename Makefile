@@ -5,6 +5,19 @@ GOFMT = gofmt
 GOLINT = golangci-lint
 OTELCOL_BUILDER_DIR ?= ~/bin
 OTELCOL_BUILDER ?= $(OTELCOL_BUILDER_DIR)/opentelemetry-collector-builder
+UNAME := $(shell uname -m)
+#Race flag is not supported on s390x architecture
+ifeq ($(UNAME), s390x)
+	RACE=
+else
+	RACE=-race
+endif
+GOTEST=go test -v $(RACE)
+
+SED=sed
+COLOR_PASS=$(shell printf "\033[32mPASS\033[0m")
+COLOR_FAIL=$(shell printf "\033[31mFAIL\033[0m")
+COLORIZE=$(SED) ''/PASS/s//$(COLOR_PASS)/'' | $(SED) ''/FAIL/s//$(COLOR_FAIL)/''
 
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
@@ -70,3 +83,7 @@ fmt:
 .PHONY: install-tools
 install-tools:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint
+
+.PHONY: test
+test:
+	bash -c "set -e; set -o pipefail; $(GOTEST) ./... | $(COLORIZE)"
